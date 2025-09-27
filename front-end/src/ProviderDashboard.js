@@ -36,7 +36,7 @@ const ProviderDashboard = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState(null);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-    const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false); // New state for edit modal
+    const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [profileDetails, setProfileDetails] = useState({ name: '', email: '' });
     const [user, setUser] = useState(null);
@@ -109,7 +109,7 @@ const ProviderDashboard = () => {
             const updatedUser = { ...user, ...profileDetails };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             setUser(updatedUser);
-            setIsProfileEditModalOpen(false); // Close the edit modal
+            setIsProfileEditModalOpen(false);
             toast.success("Profile updated successfully!");
         } catch(err) {
             toast.error(err.response?.data?.message || "Failed to update profile.");
@@ -139,7 +139,7 @@ const ProviderDashboard = () => {
                 <div className="header-right">
                     <div className="profile-menu">
                         <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="profile-btn">
-                            <span>Welcome, <strong>{user?.name || 'Provider'}</strong></span>
+                            <span>Welcome, <strong className="gradient-text">{user?.name || 'Provider'}</strong></span>
                         </button>
                         {isProfileDropdownOpen && (
                             <div className="profile-dropdown">
@@ -147,7 +147,6 @@ const ProviderDashboard = () => {
                                     <p className="dropdown-name">{user?.name}</p>
                                     <p className="dropdown-email">{user?.email}</p>
                                 </div>
-                                {/* FIXED: This button now opens the profile edit modal */}
                                 <button onClick={() => {
                                     setProfileDetails({ name: user.name, email: user.email });
                                     setIsProfileDropdownOpen(false);
@@ -173,31 +172,77 @@ const ProviderDashboard = () => {
 
                 <section className="content-panel">
                     <h3 className="panel-header"><PlusIcon /> Add New Service</h3>
-                    <form className="service-form" onSubmit={handleSubmit}>
-                         <input className="form-input full-width" required placeholder="Service name *" value={form.service_name} onChange={e => setForm({ ...form, service_name: e.target.value })} />
-                        <textarea className="form-textarea full-width" placeholder="Short description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-                        <div className="form-grid">
-                            <select required className="form-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                    <form className="add-service-form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="service_name">Service Name</label>
+                            <input id="service_name" className="form-input" required placeholder="e.g., Expert Plumbing Repair" value={form.service_name} onChange={e => setForm({ ...form, service_name: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="category">Category</label>
+                            <select id="category" required className="form-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
                                 <option value="">Select Category *</option>
                                 {FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                             </select>
-                            <input className="form-input" placeholder="Price (₹)" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
                         </div>
-                        <div className="form-grid">
-                            <select required className="form-select" value={form.availability} onChange={e => setForm({ ...form, availability: e.target.value })}>
+                        <div className="form-group full-width">
+                             <label htmlFor="description">Description</label>
+                            <textarea id="description" className="form-textarea" placeholder="Describe the service you offer..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="price">Price (₹)</label>
+                            <input id="price" className="form-input" placeholder="e.g., 500" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                             <label htmlFor="availability">Availability</label>
+                            <select id="availability" required className="form-select" value={form.availability} onChange={e => setForm({ ...form, availability: e.target.value })}>
                                 <option value="">Select Availability *</option>
                                 {FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                             </select>
-                            <input className="form-input" placeholder="Location (e.g. Bhubaneswar)" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} />
                         </div>
-                        <input className="form-input full-width" placeholder="Image URL (optional)" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} />
-                        <button type="submit" className="btn btn-primary full-width"><PlusIcon /> Add Service</button>
+                        <div className="form-group">
+                             <label htmlFor="location">Location</label>
+                            <input id="location" className="form-input" placeholder="e.g., Bhubaneswar" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                             <label htmlFor="image_url">Image URL (Optional)</label>
+                            <input id="image_url" className="form-input" placeholder="https://example.com/image.png" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} />
+                        </div>
+                        <div className="form-group full-width">
+                            <button type="submit" className="btn btn-primary"><PlusIcon /> Add Service</button>
+                        </div>
                     </form>
                 </section>
 
                 <section className="content-panel">
                     <h3 className="panel-header">Your Service Listings</h3>
-                    {/* ... (table JSX remains the same) ... */}
+                    <div className="table-wrapper">
+                        {loading ? <p>Loading...</p> : services.length === 0 ? <p>No services yet. Add one above.</p> : (
+                            <table className="services-table">
+                                <thead>
+                                    <tr><th>Service</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody>
+                                {services.map(s => (
+                                    <tr key={s.id}>
+                                        <td>
+                                            <div className="service-name-cell">
+                                                <img src={s.image_url || `https://placehold.co/100x100/10101a/a99eff?text=${s.service_name.charAt(0)}`} alt={s.service_name}/>
+                                                <span>{s.service_name}</span>
+                                            </div>
+                                        </td>
+                                        <td>{s.category}</td>
+                                        <td>₹{s.price || 'N/A'}</td>
+                                        <td><span className={`status-badge ${s.availability?.toLowerCase().replace(/\s+/g, "-") || "unavailable"}`}>{s.availability}</span></td>
+                                        <td className="actions-cell">
+                                            <button className="btn-icon" onClick={() => { setEditingService(s); setIsEditServiceModalOpen(true); }}><EditIcon /></button>
+                                            <button className="btn-icon btn-icon-danger" onClick={() => { setServiceToDelete(s); setIsDeleteModalOpen(true); }}><TrashIcon /></button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </section>
             </main>
             
@@ -207,7 +252,22 @@ const ProviderDashboard = () => {
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header"><h3>Edit Service</h3></div>
                         <form onSubmit={handleUpdateService}>
-                            {/* ... (service edit form remains the same) ... */}
+                            <div className="form-group">
+                                <label>Service Name</label>
+                                <input className="form-input" required value={editingService.service_name} onChange={e => setEditingService({ ...editingService, service_name: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea className="form-textarea" value={editingService.description || ''} onChange={e => setEditingService({ ...editingService, description: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Image URL</label>
+                                <input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setIsEditServiceModalOpen(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary">Save Changes</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -215,34 +275,42 @@ const ProviderDashboard = () => {
             
             {isDeleteModalOpen && serviceToDelete && (
                 <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-                     {/* ... (delete modal JSX remains the same) ... */}
+                    <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header"><h3>Confirm Deletion</h3></div>
+                        <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
+                        <div className="modal-actions">
+                            <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+                            <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* NEW: Added the modal for editing the user's profile */}
             {isProfileEditModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsProfileEditModalOpen(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header"><h3>Edit Your Profile</h3></div>
                         <form onSubmit={handleUpdateProfile}>
-                            <label>Full Name</label>
-                            <input 
-                                type="text" 
-                                className="form-input" 
-                                required
-                                value={profileDetails.name} 
-                                onChange={(e) => setProfileDetails({...profileDetails, name: e.target.value})} 
-                            />
-                            
-                            <label style={{marginTop: '1rem'}}>Email Address</label>
-                            <input 
-                                type="email" 
-                                className="form-input" 
-                                required
-                                value={profileDetails.email} 
-                                onChange={(e) => setProfileDetails({...profileDetails, email: e.target.value})} 
-                            />
-                            
+                            <div className="form-group">
+                                <label>Full Name</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    required
+                                    value={profileDetails.name} 
+                                    onChange={(e) => setProfileDetails({...profileDetails, name: e.target.value})} 
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Email Address</label>
+                                <input 
+                                    type="email" 
+                                    className="form-input" 
+                                    required
+                                    value={profileDetails.email} 
+                                    onChange={(e) => setProfileDetails({...profileDetails, email: e.target.value})} 
+                                />
+                            </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsProfileEditModalOpen(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary">Save Profile</button>
