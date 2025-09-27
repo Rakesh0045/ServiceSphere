@@ -233,4 +233,34 @@ app.delete("/api/services/:id", authenticateToken, async (req, res) => {
   }
 });
 
+
+// ---------------- USER PROFILE (NEW) ----------------
+
+// NEW: GET current user's profile
+app.get("/api/users/me", authenticateToken, async (req, res) => {
+  // The user object is attached by the authenticateToken middleware
+  res.json({ user: req.user });
+});
+
+// NEW: UPDATE current user's profile
+app.put("/api/users/me", authenticateToken, async (req, res) => {
+  const { name, email } = req.body;
+  const userId = req.user.id;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: "Name and email are required" });
+  }
+
+  try {
+    await pool.query(
+      "UPDATE users SET name = ?, email = ? WHERE id = ?",
+      [name, email, userId]
+    );
+    res.json({ message: "Profile updated successfully" });
+  } catch (err) {
+    console.error("Profile update error:", err);
+    res.status(500).json({ message: "Server error while updating profile" });
+  }
+});
+
 app.listen(5000, () => console.log("🚀 Server running on port 5000"));
