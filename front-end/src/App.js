@@ -5,6 +5,7 @@ import Login from "./Login";
 import Home from "./Home";
 import CustomerDashboard from "./CustomerDashboard";
 import ProviderDashboard from "./ProviderDashboard";
+import MyBookings from "./MyBookings";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/customer" element={<CustomerDashboard />} />
         <Route path="/provider" element={<ProviderDashboard />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
       </Routes>
     </Router>
   );

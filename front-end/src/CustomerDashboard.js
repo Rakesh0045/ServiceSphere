@@ -4,6 +4,7 @@ import axios from "axios";
 import "./CustomerDashboard.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import BookingModal from './BookingModal';
 
 const API_BASE = "http://localhost:5000/api";
 
@@ -14,6 +15,7 @@ const TagIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height=
 const PowerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>;
 const SortIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h18M3 8h12M3 12h8M3 16h4"/></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
 
 
 const CustomerDashboard = () => {
@@ -25,6 +27,10 @@ const CustomerDashboard = () => {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
     const [profileDetails, setProfileDetails] = useState({ name: '', email: '' });
+    
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [selectedService, setSelectedService] = useState(null);
+
     const token = localStorage.getItem("token");
     const axiosWithAuth = useMemo(() => axios.create({ baseURL: API_BASE, headers: { Authorization: `Bearer ${token}` } }), [token]);
 
@@ -65,6 +71,11 @@ const CustomerDashboard = () => {
         debouncedFetchServices(filters);
     }, [token, navigate, filters, debouncedFetchServices]);
     
+    const handleOpenBookingModal = (service) => {
+        setSelectedService(service);
+        setIsBookingModalOpen(true);
+    }
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -109,6 +120,9 @@ const CustomerDashboard = () => {
                                     <p className="dropdown-name">{user?.name}</p>
                                     <p className="dropdown-email">{user?.email}</p>
                                 </div>
+                                <button onClick={() => navigate('/my-bookings')} className="dropdown-item">
+                                    <CalendarIcon /> My Bookings
+                                </button>
                                 <button onClick={() => {
                                     setProfileDetails({ name: user.name, email: user.email });
                                     setIsProfileDropdownOpen(false);
@@ -178,13 +192,14 @@ const CustomerDashboard = () => {
                                     <span><MapPinIcon /> {s.location || 'Not specified'}</span>
                                 </div>
                                 <p className="card-desc">{s.description}</p>
-                            </div>
-                            <div className="card-footer">
-                                <div className="provider-info">
-                                    <span>Provider</span>
-                                    <p>{s.provider_name || 'Anonymous'}</p>
+                                
+                                <div className="card-footer">
+                                    <div className="provider-info">
+                                        <span>Provider</span>
+                                        <p>{s.provider_name || 'Anonymous'}</p>
+                                    </div>
+                                   {s.availability === "Available" ? <button className="details-btn" onClick={() => handleOpenBookingModal(s)}>Book Now</button> : null}
                                 </div>
-                                <button className="details-btn">View Details</button>
                             </div>
                         </div>
                     ))}
@@ -196,6 +211,14 @@ const CustomerDashboard = () => {
                 )}
             </main>
             
+            {isBookingModalOpen && (
+                <BookingModal 
+                    service={selectedService} 
+                    onClose={() => setIsBookingModalOpen(false)}
+                    axiosWithAuth={axiosWithAuth}
+                />
+            )}
+
             {isProfileEditModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsProfileEditModalOpen(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -206,8 +229,8 @@ const CustomerDashboard = () => {
                                 <input type="text" className="form-input" required value={profileDetails.name} onChange={(e) => setProfileDetails({...profileDetails, name: e.target.value})} />
                             </div>
                             <div className="form-group">
-                                <label>Email Address (cannot be changed)</label>
-                                <input type="email" className="form-input" readOnly value={profileDetails.email} style={{ cursor: 'not-allowed', color: 'var(--text-secondary)' }} />
+                                <label>Email Address</label>
+                                <input type="email" className="form-input" required value={profileDetails.email} onChange={(e) => setProfileDetails({...profileDetails, email: e.target.value})} />
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsProfileEditModalOpen(false)}>Cancel</button>
