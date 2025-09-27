@@ -9,7 +9,6 @@
 }
 
 body { margin: 0; background-color: var(--dark-bg); color: var(--text-primary); font-family: 'Outfit', sans-serif; }
-
 .customer-dashboard { display: flex; flex-direction: column; min-height: 100vh; }
 
 /* --- Header --- */
@@ -86,14 +85,27 @@ body { margin: 0; background-color: var(--dark-bg); color: var(--text-primary); 
 .service-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 0 1px var(--primary-color); border-color: var(--primary-color); }
 .card-img-container { position: relative; height: 200px; background-color: var(--dark-bg); }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* UPDATED: Availability Badge for better visibility */
 .availability-badge {
     position: absolute; top: 1rem; right: 1rem; padding: 0.3rem 0.8rem;
     border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize;
-    backdrop-filter: blur(5px); background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff; /* Bright white text for all badges */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
-.availability-badge.available { border-color: var(--success-color); color: var(--success-color); }
-.availability-badge.unavailable, .availability-badge.temporarily-unavailable { border-color: var(--error-color); color: var(--error-color); }
-.availability-badge.busy { border-color: var(--warning-color); color: var(--warning-color); }
+.availability-badge.available {
+    background-color: rgba(46, 204, 113, 0.7); /* More opaque green */
+}
+.availability-badge.unavailable, .availability-badge.temporarily-unavailable {
+    background-color: rgba(231, 76, 60, 0.7); /* More opaque red */
+}
+.availability-badge.busy {
+    background-color: rgba(243, 156, 18, 0.7); /* More opaque orange */
+}
+/* END: Badge Update */
+
 .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
 .card-header h3 { font-size: 1.25rem; margin: 0; line-height: 1.3; }
