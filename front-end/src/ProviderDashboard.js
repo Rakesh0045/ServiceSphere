@@ -66,8 +66,8 @@ const ProviderDashboard = () => {
         }));
     };
 
-    const fetchProviderData = async (providerId) => {
-        setLoading(true);
+    const fetchProviderData = async (providerId, initialLoad = false) => {
+        if (initialLoad) setLoading(true);
         try {
             const [servicesRes, bookingsRes, scheduleRes] = await Promise.all([
                 axiosWithAuth.get("/services", { params: { provider_id: providerId } }),
@@ -87,18 +87,30 @@ const ProviderDashboard = () => {
             });
             setSchedule(fullSchedule);
         } catch (err) {
-            toast.error("Failed to fetch provider data.");
+            if(initialLoad) toast.error("Failed to fetch provider data.");
+            console.error("Data fetch error:", err);
         } finally {
-            setLoading(false);
+            if (initialLoad) setLoading(false);
         }
     };
     
     useEffect(() => {
-        if (!token) { navigate('/login'); return; }
-        const currentUser = JSON.parse(localStorage.getItem("user"));
+        let currentUser;
+        if (!token) { 
+            navigate('/login'); 
+            return; 
+        }
+        
+        currentUser = JSON.parse(localStorage.getItem("user"));
         if (currentUser) {
             setUser(currentUser);
-            fetchProviderData(currentUser.id);
+            fetchProviderData(currentUser.id, true);
+
+            const intervalId = setInterval(() => {
+                fetchProviderData(currentUser.id, false);
+            }, 30000);
+
+            return () => clearInterval(intervalId);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, navigate]);
@@ -106,10 +118,10 @@ const ProviderDashboard = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axiosWithAuth.post("/services", { ...form, availability: "Available" });
-            toast.success("Service added successfully!");
+            await axiosWithAuth.post("/services", { ...form });
+            toast.success("Service submitted for admin approval!");
             setForm({ service_name: "", description: "", category: "", price: "", location: "", image_url: "" });
-            await fetchProviderData(user.id);
+            await fetchProviderData(user.id, true);
             setActiveTab('services');
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to add service.");
@@ -122,7 +134,7 @@ const ProviderDashboard = () => {
         try {
             await axiosWithAuth.put(`/services/${editingService.id}`, editingService);
             setIsEditServiceModalOpen(false);
-            fetchProviderData(user.id);
+            await fetchProviderData(user.id, true);
             toast.success("Service updated successfully!");
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to update service.");
@@ -133,7 +145,7 @@ const ProviderDashboard = () => {
         if(!serviceToDelete) return;
         try {
             await axiosWithAuth.delete(`/services/${serviceToDelete.id}`);
-            fetchProviderData(user.id);
+            await fetchProviderData(user.id, true);
             setIsDeleteModalOpen(false);
             toast.success("Service deleted successfully!");
         } catch (err) {
@@ -161,7 +173,7 @@ const ProviderDashboard = () => {
         try {
             await axiosWithAuth.put(`/bookings/${bookingId}/status`, { status: newStatus });
             toast.success("Booking status updated!");
-            fetchProviderData(user.id);
+            await fetchProviderData(user.id, false);
         } catch(error) {
             toast.error("Failed to update booking status.");
         }
@@ -193,38 +205,32 @@ const ProviderDashboard = () => {
         totalEarnings: bookings.filter(b => b.status === "Completed").reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0).toFixed(2),
     }), [services, bookings]);
 
-    const FALLBACK_CATEGORIES = [ "Plumbing", "Electrical", "Carpentry", "House Cleaning", "IT Services", "Appliance Repair", "Gardening", "Tutoring", "Other" ];
-    const FALLBACK_AVAILABILITIES = [ "Available", "Unavailable", "Busy" ];
+    const FALLBACK_CATEGORIES = ["Plumbing", "Electrical", "Carpentry", "House Cleaning", "IT Services", "Appliance Repair", "Gardening", "Tutoring", "Other"];
+    const FALLBACK_AVAILABILITIES = ["Available", "Unavailable", "Busy"];
 
     return (
         <div className="main-content-wrapper">
             <ToastContainer theme="dark" position="bottom-right"/>
             <header className="main-header">
                 <h1 className="header-title">ProManage Dashboard</h1>
-                    <div className="header-right">
-                        <div className="profile-menu">
-                            <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="profile-btn">
-                                <span>Welcome, <strong className="gradient-text">{user?.name || 'Provider'}</strong></span>
-                            </button>
-                            {isProfileDropdownOpen && (
-                                <div className="profile-dropdown">
-                                    <div className="dropdown-header">
-                                        <p className="dropdown-name">{user?.name}</p>
-                                        <p className="dropdown-email">{user?.email}</p>
-                                    </div>
-                                    <button onClick={() => navigate('/my-bookings')} className="dropdown-item">
-                                        <CalendarIcon /> My Bookings
-                                    </button>
-                                    <button onClick={() => { setProfileDetails({ name: user.name, email: user.email }); setIsProfileDropdownOpen(false); setIsProfileEditModalOpen(true); }} className="dropdown-item">
-                                        <UserIcon /> Edit Profile
-                                    </button>
-                                    <button onClick={handleSignOut} className="dropdown-item">
-                                        <PowerIcon /> Sign Out
-                                    </button>
+                <div className="header-right">
+                    <div className="profile-menu">
+                        <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="profile-btn">
+                            <span>Welcome, <strong className="gradient-text">{user?.name || 'Provider'}</strong></span>
+                        </button>
+                        {isProfileDropdownOpen && (
+                            <div className="profile-dropdown">
+                                <div className="dropdown-header">
+                                    <p className="dropdown-name">{user?.name}</p>
+                                    <p className="dropdown-email">{user?.email}</p>
                                 </div>
-                            )}
-                        </div>
+                                <button onClick={() => navigate('/my-bookings')} className="dropdown-item"><CalendarIcon /> My Bookings</button>
+                                <button onClick={() => { setProfileDetails({ name: user.name, email: user.email }); setIsProfileDropdownOpen(false); setIsProfileEditModalOpen(true); }} className="dropdown-item"><UserIcon /> Edit Profile</button>
+                                <button onClick={handleSignOut} className="dropdown-item"><PowerIcon /> Sign Out</button>
+                            </div>
+                        )}
                     </div>
+                </div>
             </header>
 
             <main className="content-area">
@@ -247,7 +253,13 @@ const ProviderDashboard = () => {
                             {loading ? <p>Loading...</p> : services.length === 0 ? <p>No services yet. Add one in the 'Add Service' tab.</p> : (
                                 <table className="services-table">
                                     <thead>
-                                        <tr><th>Service</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Approval Status</th> 
+                                            <th>Actions</th>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                     {services.map(s => (
@@ -255,8 +267,11 @@ const ProviderDashboard = () => {
                                             <td><div className="service-name-cell"><img src={s.image_url || `https://placehold.co/100x100/10101a/a99eff?text=${s.service_name.charAt(0)}`} alt={s.service_name}/><span>{s.service_name}</span></div></td>
                                             <td>{s.category}</td>
                                             <td>₹{s.price || 'N/A'}</td>
-                                            <td><span className={`status-badge ${s.availability?.toLowerCase()}`}>{s.availability}</span></td>
-                                            <td className="actions-cell"><button className="btn-icon" onClick={() => { setEditingService(s); setIsEditServiceModalOpen(true); }}><EditIcon /></button><button className="btn-icon btn-icon-danger" onClick={() => { setServiceToDelete(s); setIsDeleteModalOpen(true); }}><TrashIcon /></button></td>
+                                            <td className="status-cell"><span className={`status-badge ${s.status?.toLowerCase()}`}>{s.status}</span></td>
+                                            <td className="actions-cell">
+                                                <button className="btn-icon" onClick={() => { setEditingService(s); setIsEditServiceModalOpen(true); }}><EditIcon /></button>
+                                                <button className="btn-icon btn-icon-danger" onClick={() => { setServiceToDelete(s); setIsDeleteModalOpen(true); }}><TrashIcon /></button>
+                                            </td>
                                         </tr>
                                     ))}
                                     </tbody>
@@ -269,6 +284,7 @@ const ProviderDashboard = () => {
                 {activeTab === 'addService' && (
                     <section className="content-panel">
                         <h3 className="panel-header"><PlusIcon /> Add a New Service</h3>
+                        <p className="panel-subtitle">Newly added services will be sent to an admin for approval before they are visible to customers.</p>
                         <form className="add-service-form" onSubmit={handleSubmit}>
                             <div className="form-group full-width"><label htmlFor="service_name">Service Name</label><input id="service_name" className="form-input" required placeholder="e.g., Expert Plumbing Repair" value={form.service_name} onChange={e => setForm({ ...form, service_name: e.target.value })} /></div>
                             <div className="form-group full-width"><label htmlFor="description">Description</label><textarea id="description" className="form-textarea" placeholder="Describe the service you offer..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
@@ -282,7 +298,7 @@ const ProviderDashboard = () => {
                 )}
 
                 {activeTab === 'bookings' && (
-                    <>
+                     <>
                         <section className="content-panel">
                             <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
                             <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
@@ -352,34 +368,12 @@ const ProviderDashboard = () => {
                         <div className="modal-header"><h3>Edit Service</h3></div>
                         <form onSubmit={handleUpdateService}>
                             <div className="modal-form-grid">
-                                <div className="form-group full-width">
-                                    <label>Service Name</label>
-                                    <input className="form-input" required value={editingService.service_name} onChange={e => setEditingService({ ...editingService, service_name: e.target.value })} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Category</label>
-                                    <select className="form-select" required value={editingService.category} onChange={e => setEditingService({ ...editingService, category: e.target.value })}>
-                                        {FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Price (₹)</label>
-                                    <input type="number" className="form-input" placeholder="e.g. 500" value={editingService.price || ''} onChange={e => setEditingService({ ...editingService, price: e.target.value })} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Availability</label>
-                                    <select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>
-                                        {FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Location</label>
-                                    <input type="text" className="form-input" placeholder="e.g. Bhubaneswar" value={editingService.location || ''} onChange={e => setEditingService({ ...editingService, location: e.target.value })} />
-                                </div>
-                                <div className="form-group full-width">
-                                    <label>Image URL</label>
-                                    <input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} />
-                                </div>
+                                <div className="form-group full-width"><label>Service Name</label><input className="form-input" required value={editingService.service_name} onChange={e => setEditingService({ ...editingService, service_name: e.target.value })} /></div>
+                                <div className="form-group"><label>Category</label><select className="form-select" required value={editingService.category} onChange={e => setEditingService({ ...editingService, category: e.target.value })}>{FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+                                <div className="form-group"><label>Price (₹)</label><input type="number" className="form-input" placeholder="e.g. 500" value={editingService.price || ''} onChange={e => setEditingService({ ...editingService, price: e.target.value })} /></div>
+                                <div className="form-group"><label>Availability</label><select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>{FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                <div className="form-group"><label>Location</label><input type="text" className="form-input" placeholder="e.g. Bhubaneswar" value={editingService.location || ''} onChange={e => setEditingService({ ...editingService, location: e.target.value })} /></div>
+                                <div className="form-group full-width"><label>Image URL</label><input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} /></div>
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsEditServiceModalOpen(false)}>Cancel</button>
@@ -392,37 +386,31 @@ const ProviderDashboard = () => {
             
             {isDeleteModalOpen && serviceToDelete && (
                  <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-                    <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header"><h3>Confirm Deletion</h3></div>
-                        <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
-                        <div className="modal-actions">
-                            <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
-                            <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
-                        </div>
-                    </div>
-                </div>
+                     <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
+                         <div className="modal-header"><h3>Confirm Deletion</h3></div>
+                         <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
+                         <div className="modal-actions">
+                             <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+                             <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
+                         </div>
+                     </div>
+                 </div>
             )}
             
             {isProfileEditModalOpen && (
-                <div className="modal-overlay" onClick={() => setIsProfileEditModalOpen(false)}>
+                 <div className="modal-overlay" onClick={() => setIsProfileEditModalOpen(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header"><h3>Edit Your Profile</h3></div>
                         <form onSubmit={handleUpdateProfile}>
-                            <div className="form-group">
-                                <label>Full Name</label>
-                                <input type="text" className="form-input" required value={profileDetails.name} onChange={(e) => setProfileDetails({...profileDetails, name: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label>Email Address</label>
-                                <input type="email" className="form-input" required value={profileDetails.email} onChange={(e) => setProfileDetails({...profileDetails, email: e.target.value})} />
-                            </div>
+                            <div className="form-group"><label>Full Name</label><input type="text" className="form-input" required value={profileDetails.name} onChange={(e) => setProfileDetails({...profileDetails, name: e.target.value})} /></div>
+                            <div className="form-group"><label>Email Address</label><input type="email" className="form-input" required value={profileDetails.email} onChange={(e) => setProfileDetails({...profileDetails, email: e.target.value})} /></div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsProfileEditModalOpen(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary">Save Changes</button>
                             </div>
                         </form>
                     </div>
-                </div>
+                 </div>
             )}
         </div>
     );

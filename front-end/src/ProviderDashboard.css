@@ -297,7 +297,7 @@ body {
 
 .actions-cell {
     display: flex;
-    align-items: center;
+    align-items: center; /* Ensures vertical alignment */
     gap: 0.5rem;
 }
 
@@ -569,4 +569,9 @@ body {
 .btn.btn-small.danger {
     background-color: var(--error-color);
     color: white;
+}
+
+/* Add this new rule to ProviderDashboard.css */
+.status-cell {
+    vertical-align: middle;
 }

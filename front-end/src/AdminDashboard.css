@@ -1,0 +1,173 @@
+/* src/AdminDashboard.css */
+:root {
+  --primary-color: #6a5af9; --primary-light: #a99eff; --accent-color: #f92bff;
+  --dark-bg: #10101a; --card-bg: #191925; --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b0; --border-color: rgba(255, 255, 255, 0.1);
+  --error-color: #e74c3c; --warning-color: #f39c12; --success-color: #2ecc71;
+}
+
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--dark-bg);
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.signout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.signout-btn:hover {
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    border-color: var(--primary-light);
+}
+
+.admin-content {
+    padding: 2rem;
+}
+
+/* NEW: Tabs styling */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+}
+
+.tab-btn.active {
+    color: var(--primary-light);
+    border-bottom-color: var(--primary-light);
+}
+
+/* Stats Section */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.admin-stat-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid;
+}
+
+.admin-stat-icon { color: var(--primary-light); }
+.admin-stat-info { display: flex; flex-direction: column; }
+.admin-stat-title { font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+.admin-stat-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+
+/* Analytics Section for Top Categories/Services */
+.analytics-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .analytics-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.panel-header {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Admin Table */
+.table-wrapper { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th, .admin-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+.admin-table th { font-weight: 600; color: var(--text-secondary); }
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover { background-color: var(--dark-bg); }
+
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
+.status-badge.pending { background-color: rgba(243, 156, 18, 0.1); color: var(--warning-color); }
+.status-badge.approved { background-color: rgba(46, 204, 113, 0.1); color: var(--success-color); }
+.status-badge.rejected { background-color: rgba(231, 76, 60, 0.1); color: var(--error-color); }
+
+.actions-cell { display: flex; gap: 0.5rem; justify-content: center; }
+.btn-admin-action { border: none; padding: 6px 12px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+.btn-admin-action:hover { opacity: 0.8; }
+.btn-admin-action.approve { background-color: var(--success-color); color: white; }
+.btn-admin-action.reject { background-color: var(--error-color); color: white; }
+
+/* Top Lists Panel */
+.top-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+.top-list li { display: flex; justify-content: space-between; align-items: center; background-color: var(--dark-bg); padding: 1rem; border-radius: 8px; }
+.list-item-name { font-weight: 500; }
+.list-item-count { font-size: 0.9rem; color: var(--text-secondary); background-color: var(--card-bg); padding: 4px 8px; border-radius: 6px; }
+.empty-list-item { color: var(--text-secondary); text-align: center; padding: 1rem; background-color: transparent; }
+
+/* Loader */
+.loader-container { min-height: 50vh; display: flex; justify-content: center; align-items: center; }
+.loader { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Add this to the end of AdminDashboard.css */
+
+.no-actions-text {
+    color: var(--text-secondary);
+    padding: 6px 12px;
+}
