@@ -252,18 +252,42 @@ const ProviderDashboard = () => {
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header"><h3>Edit Service</h3></div>
                         <form onSubmit={handleUpdateService}>
-                            <div className="form-group">
-                                <label>Service Name</label>
-                                <input className="form-input" required value={editingService.service_name} onChange={e => setEditingService({ ...editingService, service_name: e.target.value })} />
+                            <div className="modal-form-grid">
+                                <div className="form-group full-width">
+                                    <label>Service Name</label>
+                                    <input className="form-input" required value={editingService.service_name} onChange={e => setEditingService({ ...editingService, service_name: e.target.value })} />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Category</label>
+                                    <select className="form-select" required value={editingService.category} onChange={e => setEditingService({ ...editingService, category: e.target.value })}>
+                                        {FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Availability</label>
+                                    <select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>
+                                        {FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Price (₹)</label>
+                                    <input type="number" className="form-input" placeholder="e.g. 500" value={editingService.price || ''} onChange={e => setEditingService({ ...editingService, price: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Location</label>
+                                    <input type="text" className="form-input" placeholder="e.g. Bhubaneswar" value={editingService.location || ''} onChange={e => setEditingService({ ...editingService, location: e.target.value })} />
+                                </div>
+                                {/* <div className="form-group full-width">
+                                    <label>Description</label>
+                                    <textarea className="form-textarea" value={editingService.description || ''} onChange={e => setEditingService({ ...editingService, description: e.target.value })} />
+                                </div> */}
+                                <div className="form-group full-width">
+                                    <label>Image URL</label>
+                                    <input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label>Description</label>
-                                <textarea className="form-textarea" value={editingService.description || ''} onChange={e => setEditingService({ ...editingService, description: e.target.value })} />
-                            </div>
-                            <div className="form-group">
-                                <label>Image URL</label>
-                                <input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} />
-                            </div>
+
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsEditServiceModalOpen(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary">Save Changes</button>
