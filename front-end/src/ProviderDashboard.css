@@ -455,3 +455,118 @@ body {
     overflow: hidden;
     z-index: 110;
 }
+
+/* Add these new rules to the end of your ProviderDashboard.css file */
+
+.rating-cell {
+    min-width: 120px;
+}
+
+.star-rating-display {
+    display: flex;
+    gap: 0.1rem;
+    font-size: 1.1rem;
+    white-space: nowrap;
+}
+
+.star-rating-display .star-filled {
+    color: var(--warning-color);
+}
+.star-rating-display .star-empty {
+    color: var(--border-color);
+}
+
+.review-comment-provider {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    margin: 0.5rem 0 0 0;
+    white-space: normal;
+}
+
+/* --- NEW STYLES for Bookings Tab --- */
+
+.provider-bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.provider-booking-card {
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.provider-card-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.provider-card-details h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.provider-card-details p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.provider-card-details p strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.review-display-provider {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.star-rating-display {
+    display: flex;
+    gap: 0.1rem;
+    font-size: 1.1rem;
+    color: var(--warning-color);
+}
+.star-rating-display .star-empty {
+    color: var(--border-color);
+}
+
+.review-comment-provider {
+    font-style: italic;
+    color: var(--text-secondary) !important; /* Override p color */
+    margin-top: 0.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+.provider-card-status {
+    flex-shrink: 0;
+}
+
+.provider-card-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn.btn-small {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+.btn.btn-small.success {
+    background-color: var(--success-color);
+    color: white;
+}
+.btn.btn-small.danger {
+    background-color: var(--error-color);
+    color: white;
+}

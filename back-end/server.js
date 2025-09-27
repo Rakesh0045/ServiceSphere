@@ -1,5 +1,3 @@
-// server.js (Corrected with better error logging)
-
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -13,7 +11,7 @@ app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || "mysecret";
 
-// Helper middleware to authenticate and get user from token
+// Middleware to authenticate token
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -25,8 +23,6 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
-// ... AUTH and USER PROFILE routes are unchanged ...
 
 // ---------------- AUTH ----------------
 app.post("/api/signup", async (req, res) => {
@@ -100,7 +96,6 @@ app.put("/api/users/me", authenticateToken, async (req, res) => {
     }
 });
 
-
 // ---------------- SERVICES CRUD ----------------
 app.post("/api/services", authenticateToken, async (req, res) => {
     const provider_id = req.user.id;
@@ -120,27 +115,42 @@ app.post("/api/services", authenticateToken, async (req, res) => {
     }
 });
 
-// GET SERVICES - UPDATED WITH DETAILED LOGGING
 app.get("/api/services", async (req, res) => {
-    const { category, keyword, location, provider_id } = req.query;
+    const { category, keyword, location, provider_id, sortBy } = req.query;
     let query = `
-        SELECT s.*, u.name as provider_name 
+        SELECT 
+            s.*, 
+            u.name as provider_name,
+            AVG(r.rating) as average_rating,
+            COUNT(r.id) as review_count
         FROM services s
         JOIN users u ON s.provider_id = u.id
+        LEFT JOIN reviews r ON s.id = r.service_id
         WHERE 1=1
     `;
     const params = [];
+
     if (category) { query += " AND s.category LIKE ?"; params.push(`%${category}%`); }
     if (keyword) { query += " AND (s.service_name LIKE ? OR s.description LIKE ?)"; params.push(`%${keyword}%`, `%${keyword}%`); }
     if (location) { query += " AND s.location LIKE ?"; params.push(`%${location}%`); }
     if (provider_id) { query += " AND s.provider_id = ?"; params.push(provider_id); }
+
+    query += " GROUP BY s.id";
+
+    if (sortBy === 'price_asc') {
+        query += " ORDER BY s.price ASC";
+    } else if (sortBy === 'price_desc') {
+        query += " ORDER BY s.price DESC";
+    } else if (sortBy === 'rating_desc') {
+        query += " ORDER BY average_rating DESC";
+    }
+
     try {
         const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (err) {
-        // THIS IS THE NEW LOGGING
         console.error("!!! DATABASE ERROR fetching services:", err);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error while fetching services" });
     }
 });
 
@@ -178,8 +188,6 @@ app.delete("/api/services/:id", authenticateToken, async (req, res) => {
     }
 });
 
-
-// ... SCHEDULES and other BOOKING routes are unchanged ...
 // ---------------- SCHEDULES ----------------
 app.get("/api/schedules", authenticateToken, async (req, res) => {
     const provider_id = req.user.id;
@@ -291,15 +299,25 @@ app.post("/api/bookings", authenticateToken, async (req, res) => {
 app.get("/api/bookings", authenticateToken, async (req, res) => {
     const { id: userId, role } = req.user;
     const userRole = role ? role.toLowerCase() : '';
+    
     const baseQuery = `
-        SELECT b.id, b.status, b.booking_start_time, s.service_name, s.price,
-               cust.name as customer_name, prov.name as provider_name
+        SELECT 
+            b.id, b.status, b.booking_start_time,
+            s.id as service_id, s.service_name, s.price,
+            cust.name as customer_name,
+            prov.id as provider_id, prov.name as provider_name,
+            r.id as review_id,
+            r.rating,
+            r.comment
         FROM bookings b
         JOIN services s ON b.service_id = s.id
         JOIN users cust ON b.customer_id = cust.id
         JOIN users prov ON b.provider_id = prov.id
+        LEFT JOIN reviews r ON b.id = r.booking_id
     `;
+
     let query = '';
+
     if (userRole === 'customer') {
         query = `${baseQuery} WHERE b.customer_id = ? ORDER BY b.booking_start_time DESC`;
     } else if (userRole === 'service provider') {
@@ -307,6 +325,7 @@ app.get("/api/bookings", authenticateToken, async (req, res) => {
     } else {
         return res.status(403).json({ message: "Unauthorized: Role not recognized" });
     }
+
     try {
         const [bookings] = await pool.query(query, [userId]);
         res.json(bookings);
@@ -338,6 +357,43 @@ app.put("/api/bookings/:bookingId/status", authenticateToken, async (req, res) =
     }
 });
 
+// ---------------- REVIEWS ----------------
+app.post("/api/reviews", authenticateToken, async (req, res) => {
+    const customer_id = req.user.id;
+    const { booking_id, service_id, provider_id, rating, comment } = req.body;
+
+    if (!booking_id || !service_id || !provider_id || !rating) {
+        return res.status(400).json({ message: "Missing required fields for review." });
+    }
+    if (rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Rating must be between 1 and 5." });
+    }
+
+    try {
+        const [bookingRows] = await pool.query(
+            "SELECT * FROM bookings WHERE id = ? AND customer_id = ? AND status = 'Completed'",
+            [booking_id, customer_id]
+        );
+
+        if (bookingRows.length === 0) {
+            return res.status(403).json({ message: "You can only review your own completed bookings." });
+        }
+
+        await pool.query(
+            "INSERT INTO reviews (booking_id, service_id, customer_id, provider_id, rating, comment) VALUES (?, ?, ?, ?, ?, ?)",
+            [booking_id, service_id, customer_id, provider_id, rating, comment]
+        );
+
+        res.status(201).json({ message: "Thank you for your feedback!" });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: "You have already reviewed this booking." });
+        }
+        console.error("Error creating review:", error);
+        res.status(500).json({ message: "Server error while submitting review." });
+    }
+});
 
 // --- Server Listen ---
-app.listen(5000, () => console.log("🚀 Server running on port 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -5,6 +5,7 @@ import "./CustomerDashboard.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import BookingModal from './BookingModal';
+import ServiceDetailModal from "./ServiceDetailModal"; // Import the new modal
 
 const API_BASE = "http://localhost:5000/api";
 
@@ -16,19 +17,34 @@ const PowerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" heigh
 const SortIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h18M3 8h12M3 12h8M3 16h4"/></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
 const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+const StarIcon = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
 
+const StarRating = ({ rating, count }) => {
+    const fullStars = Math.round(rating);
+    if (count === 0 || !rating) {
+        return <div className="star-rating"><span className="rating-text">No reviews yet</span></div>;
+    }
+    return (
+        <div className="star-rating">
+            {[...Array(5)].map((_, i) => <StarIcon key={i} className={i < fullStars ? "star-filled" : "star-empty"} />)}
+            <span className="rating-text">{parseFloat(rating).toFixed(1)} ({count} {count === 1 ? 'review' : 'reviews'})</span>
+        </div>
+    );
+};
 
 const CustomerDashboard = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-    const [filters, setFilters] = useState({ keyword: "", category: "", location: "", sortBy: "" });
+    const [filters, setFilters] = useState({ keyword: "", category: "", location: "", sortBy: "rating_desc" });
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
     const [profileDetails, setProfileDetails] = useState({ name: '', email: '' });
     
+    // State for both modals
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedService, setSelectedService] = useState(null);
 
     const token = localStorage.getItem("token");
@@ -45,16 +61,8 @@ const CustomerDashboard = () => {
     const fetchServices = useCallback(async (currentFilters) => {
         setLoading(true);
         try {
-            const { sortBy, ...apiFilters } = currentFilters;
-            const res = await axios.get(`${API_BASE}/services`, { params: apiFilters });
-            let fetchedServices = res.data || [];
-
-            if (sortBy === 'price_asc') {
-                fetchedServices.sort((a, b) => (a.price || Infinity) - (b.price || Infinity));
-            } else if (sortBy === 'price_desc') {
-                fetchedServices.sort((a, b) => (b.price || 0) - (a.price || 0));
-            }
-            setServices(fetchedServices);
+            const res = await axios.get(`${API_BASE}/services`, { params: currentFilters });
+            setServices(res.data || []);
         } catch (err) {
             toast.error("Failed to fetch services.");
         } finally {
@@ -74,7 +82,12 @@ const CustomerDashboard = () => {
     const handleOpenBookingModal = (service) => {
         setSelectedService(service);
         setIsBookingModalOpen(true);
-    }
+    };
+
+    const handleOpenDetailModal = (service) => {
+        setSelectedService(service);
+        setIsDetailModalOpen(true);
+    };
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -108,7 +121,7 @@ const CustomerDashboard = () => {
         <div className="customer-dashboard">
             <ToastContainer theme="dark" position="bottom-right" />
             <header className="customer-header">
-                <div className="logo">ServiceSphere</div>
+                <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>ServiceSphere</div>
                 <div className="header-right">
                     <div className="profile-menu">
                         <button onClick={() => setIsProfileDropdownOpen(prev => !prev)} className="profile-btn">
@@ -123,11 +136,7 @@ const CustomerDashboard = () => {
                                 <button onClick={() => navigate('/my-bookings')} className="dropdown-item">
                                     <CalendarIcon /> My Bookings
                                 </button>
-                                <button onClick={() => {
-                                    setProfileDetails({ name: user.name, email: user.email });
-                                    setIsProfileDropdownOpen(false);
-                                    setIsProfileEditModalOpen(true);
-                                }} className="dropdown-item">
+                                <button onClick={() => { setProfileDetails({ name: user.name, email: user.email }); setIsProfileDropdownOpen(false); setIsProfileEditModalOpen(true); }} className="dropdown-item">
                                     <UserIcon /> Edit Profile
                                 </button>
                                 <button onClick={handleSignOut} className="dropdown-item">
@@ -164,6 +173,7 @@ const CustomerDashboard = () => {
                         <span className="icon"><SortIcon/></span>
                         <select name="sortBy" className="filter-select" value={filters.sortBy} onChange={handleFilterChange}>
                             <option value="">Sort By</option>
+                            <option value="rating_desc">Rating: High to Low</option>
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
                         </select>
@@ -176,30 +186,32 @@ const CustomerDashboard = () => {
                     <div className="services-grid">
                     {services.map(s => (
                         <div key={s.id} className="service-card">
-                            <div className="card-img-container">
-                                <img src={s.image_url || `https://placehold.co/400x250/191925/a99eff?text=${s.service_name.split(' ').map(w => w[0]).join('')}`} alt={s.service_name} className="card-img" />
-                                <span className={`availability-badge ${getAvailabilityClass(s.availability)}`}>
-                                    {s.availability || 'Not Set'}
-                                </span>
-                            </div>
-                            <div className="card-content">
-                                <div className="card-header">
-                                    <h3>{s.service_name}</h3>
-                                    <p className="service-price">₹{s.price || 'N/A'}</p>
+                            <div className="card-clickable-area" onClick={() => handleOpenDetailModal(s)}>
+                                <div className="card-img-container">
+                                    <img src={s.image_url || `https://placehold.co/400x250/191925/a99eff?text=${s.service_name.split(' ').map(w => w[0]).join('')}`} alt={s.service_name} className="card-img" />
+                                    <span className={`availability-badge ${getAvailabilityClass(s.availability)}`}>
+                                        {s.availability || 'Not Set'}
+                                    </span>
                                 </div>
-                                <div className="card-meta">
-                                    <span><TagIcon /> {s.category}</span>
-                                    <span><MapPinIcon /> {s.location || 'Not specified'}</span>
-                                </div>
-                                <p className="card-desc">{s.description}</p>
-                                
-                                <div className="card-footer">
-                                    <div className="provider-info">
-                                        <span>Provider</span>
-                                        <p>{s.provider_name || 'Anonymous'}</p>
+                                <div className="card-content">
+                                    <div className="card-header">
+                                        <h3>{s.service_name}</h3>
+                                        <p className="service-price">₹{s.price ? Number(s.price).toLocaleString('en-IN') : 'N/A'}</p>
                                     </div>
-                                   {s.availability === "Available" ? <button className="details-btn" onClick={() => handleOpenBookingModal(s)}>Book Now</button> : null}
+                                    <StarRating rating={s.average_rating} count={s.review_count} />
+                                    <div className="card-meta">
+                                        <span><TagIcon /> {s.category}</span>
+                                        <span><MapPinIcon /> {s.location || 'Not specified'}</span>
+                                    </div>
+                                    <p className="card-desc">{s.description}</p>
                                 </div>
+                            </div>
+                            <div className="card-footer">
+                                <div className="provider-info">
+                                    <span>Provider</span>
+                                    <p>{s.provider_name || 'Anonymous'}</p>
+                                </div>
+                                {s.availability === "Available" ? <button className="details-btn" onClick={() => handleOpenBookingModal(s)}>Book Now</button> : <button className="details-btn disabled" disabled>Unavailable</button>}
                             </div>
                         </div>
                     ))}
@@ -216,6 +228,13 @@ const CustomerDashboard = () => {
                     service={selectedService} 
                     onClose={() => setIsBookingModalOpen(false)}
                     axiosWithAuth={axiosWithAuth}
+                />
+            )}
+            
+            {isDetailModalOpen && (
+                <ServiceDetailModal
+                    service={selectedService}
+                    onClose={() => setIsDetailModalOpen(false)}
                 />
             )}
 

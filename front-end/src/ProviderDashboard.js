@@ -17,6 +17,17 @@ const PowerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" heigh
 const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
 const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+const StarIcon = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
+
+const StarRatingDisplay = ({ rating }) => {
+    return (
+        <div className="star-rating-display">
+            {[...Array(5)].map((_, index) => (
+                <StarIcon key={index} className={index < rating ? 'star-filled' : 'star-empty'}/>
+            ))}
+        </div>
+    );
+};
 
 const StatCard = ({ icon, title, value, color }) => (
     <div className="stat-card">
@@ -51,11 +62,7 @@ const ProviderDashboard = () => {
     const initializeSchedule = () => {
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         return days.map((day, index) => ({
-            day_of_week: index,
-            day_name: day,
-            start_time: "09:00",
-            end_time: "17:00",
-            is_available: false
+            day_of_week: index, day_name: day, start_time: "09:00", end_time: "17:00", is_available: false
         }));
     };
 
@@ -194,27 +201,30 @@ const ProviderDashboard = () => {
             <ToastContainer theme="dark" position="bottom-right"/>
             <header className="main-header">
                 <h1 className="header-title">ProManage Dashboard</h1>
-                 <div className="header-right">
-                    <div className="profile-menu">
-                        <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="profile-btn">
-                            <span>Welcome, <strong className="gradient-text">{user?.name || 'Provider'}</strong></span>
-                        </button>
-                        {isProfileDropdownOpen && (
-                            <div className="profile-dropdown">
-                                <div className="dropdown-header">
-                                    <p className="dropdown-name">{user?.name}</p>
-                                    <p className="dropdown-email">{user?.email}</p>
+                    <div className="header-right">
+                        <div className="profile-menu">
+                            <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="profile-btn">
+                                <span>Welcome, <strong className="gradient-text">{user?.name || 'Provider'}</strong></span>
+                            </button>
+                            {isProfileDropdownOpen && (
+                                <div className="profile-dropdown">
+                                    <div className="dropdown-header">
+                                        <p className="dropdown-name">{user?.name}</p>
+                                        <p className="dropdown-email">{user?.email}</p>
+                                    </div>
+                                    <button onClick={() => navigate('/my-bookings')} className="dropdown-item">
+                                        <CalendarIcon /> My Bookings
+                                    </button>
+                                    <button onClick={() => { setProfileDetails({ name: user.name, email: user.email }); setIsProfileDropdownOpen(false); setIsProfileEditModalOpen(true); }} className="dropdown-item">
+                                        <UserIcon /> Edit Profile
+                                    </button>
+                                    <button onClick={handleSignOut} className="dropdown-item">
+                                        <PowerIcon /> Sign Out
+                                    </button>
                                 </div>
-                                <button onClick={() => { setProfileDetails({ name: user.name, email: user.email }); setIsProfileDropdownOpen(false); setIsProfileEditModalOpen(true); }} className="dropdown-item">
-                                    <UserIcon /> Edit Profile
-                                </button>
-                                <button onClick={handleSignOut} className="dropdown-item">
-                                    <PowerIcon /> Sign Out
-                                </button>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
             </header>
 
             <main className="content-area">
@@ -257,7 +267,7 @@ const ProviderDashboard = () => {
                 )}
 
                 {activeTab === 'addService' && (
-                     <section className="content-panel">
+                    <section className="content-panel">
                         <h3 className="panel-header"><PlusIcon /> Add a New Service</h3>
                         <form className="add-service-form" onSubmit={handleSubmit}>
                             <div className="form-group full-width"><label htmlFor="service_name">Service Name</label><input id="service_name" className="form-input" required placeholder="e.g., Expert Plumbing Repair" value={form.service_name} onChange={e => setForm({ ...form, service_name: e.target.value })} /></div>
@@ -273,48 +283,65 @@ const ProviderDashboard = () => {
 
                 {activeTab === 'bookings' && (
                     <>
-                    <section className="content-panel">
-                        <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
-                        <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
-                        <div className="schedule-editor">
-                            {schedule.map((day, index) => (
-                                <div key={day.day_of_week} className="schedule-day-row">
-                                    <label className="schedule-day-label">{day.day_name}</label>
-                                    <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
-                                    <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
-                                        <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
-                                        <span>to</span>
-                                        <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
+                        <section className="content-panel">
+                            <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
+                            <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
+                            <div className="schedule-editor">
+                                {schedule.map((day, index) => (
+                                    <div key={day.day_of_week} className="schedule-day-row">
+                                        <label className="schedule-day-label">{day.day_name}</label>
+                                        <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
+                                        <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
+                                            <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
+                                            <span>to</span>
+                                            <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
-                    </section>
-                    <section className="content-panel">
-                        <h3 className="panel-header">Customer Bookings</h3>
-                        <div className="table-wrapper">
-                             {loading ? <p>Loading...</p> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
-                                <table className="services-table">
-                                    <thead><tr><th>Customer</th><th>Service</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead>
-                                    <tbody>
+                                ))}
+                            </div>
+                            <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
+                        </section>
+                        <section className="content-panel">
+                            <h3 className="panel-header">Customer Bookings</h3>
+                            {loading ? <div className="loader"></div> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
+                                <div className="provider-bookings-list">
                                     {bookings.map(b => (
-                                        <tr key={b.id}>
-                                            <td>{b.customer_name}</td>
-                                            <td>{b.service_name}</td>
-                                            <td>{format(new Date(b.booking_start_time), 'PPp')}</td>
-                                            <td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td>
-                                            <td className="actions-cell">
-                                                {b.status === 'Pending' && (<><button className="btn-icon-text success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button><button className="btn-icon-text danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button></>)}
-                                                {b.status === 'Confirmed' && (<button className="btn-icon-text" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>)}
-                                            </td>
-                                        </tr>
+                                        <div key={b.id} className="provider-booking-card">
+                                            <div className="provider-card-main">
+                                                <div className="provider-card-details">
+                                                    <h4>{b.service_name}</h4>
+                                                    <p><strong>Customer:</strong> {b.customer_name}</p>
+                                                    <p><strong>Date:</strong> {format(new Date(b.booking_start_time), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</p>
+                                                    {b.review_id && (
+                                                        <div className="review-display-provider">
+                                                            <StarRatingDisplay rating={b.rating} />
+                                                            {b.comment && <p className="review-comment-provider">"{b.comment}"</p>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="provider-card-status">
+                                                    <span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            {(b.status === 'Pending' || b.status === 'Confirmed') && (
+                                                <div className="provider-card-actions">
+                                                    {b.status === 'Pending' && (
+                                                        <>
+                                                            <button className="btn btn-small success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button>
+                                                            <button className="btn btn-small danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button>
+                                                        </>
+                                                    )}
+                                                    {b.status === 'Confirmed' && (
+                                                        <button className="btn btn-small" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     ))}
-                                    </tbody>
-                                </table>
-                             )}
-                        </div>
-                    </section>
+                                </div>
+                            )}
+                        </section>
                     </>
                 )}
             </main>
@@ -339,8 +366,6 @@ const ProviderDashboard = () => {
                                     <label>Price (₹)</label>
                                     <input type="number" className="form-input" placeholder="e.g. 500" value={editingService.price || ''} onChange={e => setEditingService({ ...editingService, price: e.target.value })} />
                                 </div>
-
-                                {/* --- ADDED FIELDS START HERE --- */}
                                 <div className="form-group">
                                     <label>Availability</label>
                                     <select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>
@@ -351,8 +376,6 @@ const ProviderDashboard = () => {
                                     <label>Location</label>
                                     <input type="text" className="form-input" placeholder="e.g. Bhubaneswar" value={editingService.location || ''} onChange={e => setEditingService({ ...editingService, location: e.target.value })} />
                                 </div>
-                                {/* --- ADDED FIELDS END HERE --- */}
-
                                 <div className="form-group full-width">
                                     <label>Image URL</label>
                                     <input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} />
@@ -368,7 +391,7 @@ const ProviderDashboard = () => {
             )}
             
             {isDeleteModalOpen && serviceToDelete && (
-                <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
+                 <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
                     <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header"><h3>Confirm Deletion</h3></div>
                         <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
@@ -379,6 +402,7 @@ const ProviderDashboard = () => {
                     </div>
                 </div>
             )}
+            
             {isProfileEditModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsProfileEditModalOpen(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -394,7 +418,7 @@ const ProviderDashboard = () => {
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsProfileEditModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary">Save Profile</button>
+                                <button type="submit" className="btn btn-primary">Save Changes</button>
                             </div>
                         </form>
                     </div>
