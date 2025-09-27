@@ -6,12 +6,27 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "./Service.js";
 import { format } from 'date-fns';
+import multer from 'multer'; // Import multer
+import path from 'path';     // Import path
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 const JWT_SECRET = process.env.JWT_SECRET || "mysecret";
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // The folder where files will be stored
+    },
+    filename: function (req, file, cb) {
+        // Create a unique filename to prevent overwrites
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
 
 // --- MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
@@ -495,6 +510,21 @@ app.put("/api/admin/services/:id/status", authenticateToken, authenticateAdmin, 
         res.status(500).json({ message: "Server error" });
     }
 });
+
+
+
+// --- NEW: IMAGE UPLOAD ROUTE ---
+app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
+    // Return the path to the uploaded file
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    res.status(200).json({ imageUrl: imageUrl });
+});
+
+
+
 
 
 // --- SERVER LISTEN ---

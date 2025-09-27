@@ -1,3 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap');
+
+:root {
+  --primary-color: #6a5af9; 
+  --primary-light: #a99eff; 
+  --accent-color: #f92bff;
+  --dark-bg: #10101a; 
+  --card-bg: #191925; 
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b0; 
+  --border-color: rgba(255, 255, 255, 0.1);
+  --success-color: #2ecc71; 
+  --warning-color: #f39c12; 
+  --error-color: #e74c3c;
+}
+
+body { 
+  margin: 0; 
+  background-color: var(--dark-bg); 
+  color: var(--text-primary); 
+  font-family: 'Outfit', sans-serif; 
+}
+
+.customer-dashboard { 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 100vh; 
+}
+
 /* --- Header & Profile Menu --- */
 .customer-header {
     padding: 1rem 2rem;
@@ -41,7 +70,7 @@
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
   gap: 2rem; 
-  align-items: stretch; /* Stretches grid items to be the same height */
+  align-items: stretch;
 }
 
 .service-card {
@@ -50,9 +79,9 @@
     border-radius: 16px; 
     overflow: hidden; 
     transition: all 0.3s ease;
-    display: flex; /* Key property */
-    flex-direction: column; /* Key property */
-    height: 100%; /* Ensures card fills the stretched grid cell */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .service-card:hover { 
@@ -61,13 +90,27 @@
   border-color: var(--primary-color); 
 }
 
+/* --- IMAGE FIX START --- */
 .card-img-container { 
   position: relative; 
   height: 220px; 
   background-color: var(--dark-bg);
-  flex-shrink: 0; /* Prevents image area from shrinking */
+  flex-shrink: 0;
+  overflow: hidden; /* This ensures the scaled image doesn't bleed out */
 }
-.card-img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This is key: it scales the image to cover the area, cropping as needed */
+  object-position: center; /* Ensures the crop is centered */
+  transition: transform 0.4s ease; /* Smooth transition for hover effect */
+}
+
+.service-card:hover .card-img {
+  transform: scale(1.05); /* Subtle zoom on hover */
+}
+/* --- IMAGE FIX END --- */
 
 .availability-badge {
     position: absolute; top: 1rem; right: 1rem; padding: 0.4rem 1rem; border-radius: 20px; 
@@ -82,7 +125,7 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allows this middle section to take up available space */
+  flex-grow: 1;
 }
 
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
@@ -110,14 +153,14 @@
 }
 
 .card-footer { 
-  margin-top: auto; /* The final, definitive fix: Pushes footer to the bottom */
+  margin-top: auto; 
   padding: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color); 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  flex-shrink: 0; /* Prevents footer from shrinking */
+  flex-shrink: 0;
 }
 
 .provider-info { text-align: left; }
@@ -147,3 +190,10 @@
 .btn { border: none; padding: 12px 20px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-secondary { background: var(--border-color); color: var(--text-primary); }
+
+.card-clickable-area {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

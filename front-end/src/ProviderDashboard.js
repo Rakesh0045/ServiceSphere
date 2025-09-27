@@ -5,6 +5,7 @@ import "./ProviderDashboard.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { format } from 'date-fns';
+import ImageUploader from './ImageUploader'
 
 const API_BASE = "http://localhost:5000/api";
 
@@ -291,7 +292,11 @@ const ProviderDashboard = () => {
                             <div className="form-group"><label htmlFor="category">Category</label><select id="category" required className="form-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}><option value="">Select Category *</option>{FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                             <div className="form-group"><label htmlFor="price">Price (₹)</label><input id="price" className="form-input" placeholder="e.g., 500" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} /></div>
                             <div className="form-group"><label htmlFor="location">Location</label><input id="location" className="form-input" placeholder="e.g., Bhubaneswar" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
-                            <div className="form-group"><label htmlFor="image_url">Image URL (Optional)</label><input id="image_url" className="form-input" placeholder="https://example.com/image.png" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} /></div>
+                            <div className="form-group"><label>Availability</label><select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>{FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                            <div className="form-group full-width">
+                                <label>Service Image</label>
+                                <ImageUploader onUploadComplete={(url) => setForm({...form, image_url: url})} />
+                            </div>
                             <div className="form-group full-width"><button type="submit" className="btn btn-primary"><PlusIcon /> Add Service</button></div>
                         </form>
                     </section>
@@ -373,7 +378,13 @@ const ProviderDashboard = () => {
                                 <div className="form-group"><label>Price (₹)</label><input type="number" className="form-input" placeholder="e.g. 500" value={editingService.price || ''} onChange={e => setEditingService({ ...editingService, price: e.target.value })} /></div>
                                 <div className="form-group"><label>Availability</label><select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>{FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                 <div className="form-group"><label>Location</label><input type="text" className="form-input" placeholder="e.g. Bhubaneswar" value={editingService.location || ''} onChange={e => setEditingService({ ...editingService, location: e.target.value })} /></div>
-                                <div className="form-group full-width"><label>Image URL</label><input className="form-input" value={editingService.image_url || ''} onChange={e => setEditingService({ ...editingService, image_url: e.target.value })} /></div>
+                                <div className="form-group full-width">
+                                    <label>Service Image</label>
+                                    <ImageUploader 
+                                        initialImageUrl={editingService.image_url}
+                                        onUploadComplete={(url) => setEditingService({...editingService, image_url: url})} 
+                                    />
+                                </div>
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsEditServiceModalOpen(false)}>Cancel</button>
