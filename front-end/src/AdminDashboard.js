@@ -115,7 +115,7 @@ const AdminDashboard = () => {
                                     <div className="admin-panel">
                                         <h3 className="panel-header">Top Categories</h3>
                                         <ul className="top-list">
-                                            {topCategories.length > 0 ? topCategories.map((cat, index) => (
+                                            {topCategories.length > 0 ? topCategories.slice(0, 4).map((cat, index) => (
                                                 <li key={index}><span className="list-item-name">{cat.category}</span><span className="list-item-count">{cat.booking_count} Bookings</span></li>
                                             )) : <li className='empty-list-item'>No booking data yet.</li>}
                                         </ul>
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                                     <div className="admin-panel">
                                         <h3 className="panel-header">Top Services</h3>
                                         <ul className="top-list">
-                                            {topServices.length > 0 ? topServices.map((srv, index) => (
+                                            {topServices.length > 0 ? topServices.slice(0, 4).map((srv, index) => (
                                                 <li key={index}><span className="list-item-name">{srv.service_name}</span><span className="list-item-count">{srv.booking_count} Bookings</span></li>
                                             )) : <li className='empty-list-item'>No booking data yet.</li>}
                                         </ul>

@@ -34,6 +34,7 @@ const StarRating = ({ rating, count }) => {
 
 const CustomerDashboard = () => {
     const [services, setServices] = useState([]);
+    const [allServices, setAllServices] = useState([]); // Store all fetched services
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
@@ -62,7 +63,7 @@ const CustomerDashboard = () => {
         setLoading(true);
         try {
             const res = await axios.get(`${API_BASE}/services`, { params: currentFilters });
-            setServices(res.data || []);
+            setAllServices(res.data || []);
         } catch (err) {
             toast.error("Failed to fetch services.");
         } finally {
@@ -78,6 +79,34 @@ const CustomerDashboard = () => {
         if (currentUser) { setUser(currentUser); }
         debouncedFetchServices(filters);
     }, [token, navigate, filters, debouncedFetchServices]);
+
+    // Professional search: filter locally by keyword, category, location
+    useEffect(() => {
+        let filtered = allServices;
+        const keyword = filters.keyword.trim().toLowerCase();
+        if (keyword) {
+            filtered = filtered.filter(s =>
+                (s.service_name && s.service_name.toLowerCase().includes(keyword)) ||
+                (s.category && s.category.toLowerCase().includes(keyword)) ||
+                (s.description && s.description.toLowerCase().includes(keyword))
+            );
+        }
+        if (filters.category) {
+            filtered = filtered.filter(s => s.category === filters.category);
+        }
+        if (filters.location) {
+            filtered = filtered.filter(s => s.location && s.location.toLowerCase().includes(filters.location.trim().toLowerCase()));
+        }
+        // Sorting
+        if (filters.sortBy === "rating_desc") {
+            filtered = filtered.slice().sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+        } else if (filters.sortBy === "price_asc") {
+            filtered = filtered.slice().sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+        } else if (filters.sortBy === "price_desc") {
+            filtered = filtered.slice().sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+        }
+        setServices(filtered);
+    }, [allServices, filters]);
     
     const handleOpenBookingModal = (service) => {
         setSelectedService(service);

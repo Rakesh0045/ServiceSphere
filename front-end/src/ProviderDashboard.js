@@ -46,7 +46,7 @@ const ProviderDashboard = () => {
     const [bookings, setBookings] = useState([]);
     const [schedule, setSchedule] = useState([]);
     const navigate = useNavigate();
-    const [form, setForm] = useState({ service_name: "", description: "", category: "", price: "", location: "", image_url: "" });
+    const [form, setForm] = useState({ service_name: "", description: "", category: "", price: "", location: "", image_url: "", availability: "Available" });
     const [isEditServiceModalOpen, setIsEditServiceModalOpen] = useState(false);
     const [editingService, setEditingService] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -292,7 +292,7 @@ const ProviderDashboard = () => {
                             <div className="form-group"><label htmlFor="category">Category</label><select id="category" required className="form-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}><option value="">Select Category *</option>{FALLBACK_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                             <div className="form-group"><label htmlFor="price">Price (₹)</label><input id="price" className="form-input" placeholder="e.g., 500" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} /></div>
                             <div className="form-group"><label htmlFor="location">Location</label><input id="location" className="form-input" placeholder="e.g., Bhubaneswar" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
-                            <div className="form-group"><label>Availability</label><select className="form-select" required value={editingService.availability} onChange={e => setEditingService({ ...editingService, availability: e.target.value })}>{FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                            <div className="form-group"><label>Availability</label><select className="form-select" required value={form.availability} onChange={e => setForm({ ...form, availability: e.target.value })}>{FALLBACK_AVAILABILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                             <div className="form-group full-width">
                                 <label>Service Image</label>
                                 <ImageUploader onUploadComplete={(url) => setForm({...form, image_url: url})} />
