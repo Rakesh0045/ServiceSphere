@@ -3,7 +3,7 @@
 <div align="center">
   <h1 style="border-bottom: none; font-size: 2.8rem; font-weight: 800; color: #6a5af9; margin-bottom: 0.5rem;">ServiceSphere</h1>
   <p style="font-size: 1.2rem; color: #444; margin-bottom: 1.5rem;">A modern platform for discovering, booking, and managing local services.</p>
-  <img src="https://img.shields.io/badge/ServiceSphere-Local%20Services-blueviolet?style=for-the-badge" alt="ServiceSphere Badge" />
+  <img src="back-end/screenshots/landing-page.png" alt="Landing Page Screenshot" style="max-width: 700px; border-radius: 16px; box-shadow: 0 4px 24px rgba(106,90,249,0.12); margin-bottom: 1.5rem;" />
 </div>
 
 
