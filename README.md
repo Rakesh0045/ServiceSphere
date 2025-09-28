@@ -1,25 +1,31 @@
 
-# 🚀 ServiceSphere
 
-A modern platform for discovering, booking, and managing local services. Built with a React front-end and Node.js/Express back-end, ServiceSphere enables customers to find trusted providers, book appointments, and leave reviews, while providers and admins manage listings and bookings efficiently.
+<div align="center">
+  <h1 style="border-bottom: none; font-size: 2.8rem; font-weight: 800; color: #6a5af9; margin-bottom: 0.5rem;">ServiceSphere</h1>
+  <p style="font-size: 1.2rem; color: #444; margin-bottom: 1.5rem;">A modern platform for discovering, booking, and managing local services.</p>
+  <img src="https://img.shields.io/badge/ServiceSphere-Local%20Services-blueviolet?style=for-the-badge" alt="ServiceSphere Badge" />
+</div>
+
 
 
 ## ✨ Features
 
-- 👤 **Customer Portal**: Search, filter, and book services by category, location, and rating. View provider details and leave reviews.
-- 🛠️ **Provider Dashboard**: Add, edit, and manage service listings. Set weekly availability, view bookings, and respond to customer requests.
-- 🛡️ **Admin Dashboard**: Moderate service listings, approve/reject new services, view platform analytics, and manage users/providers.
-- 🔒 **Authentication**: Secure login and signup for customers, providers, and admins.
-- 🖼️ **Image Uploads**: Providers can upload service images for better visibility.
-- 📱 **Responsive UI**: Optimized for desktop and mobile devices.
+- <b>Customer Portal</b>: Search, filter, and book services by category, location, and rating. View provider details and leave reviews.
+- <b>Provider Dashboard</b>: Add, edit, and manage service listings. Set weekly availability, view bookings, and respond to customer requests.
+- <b>Admin Dashboard</b>: Moderate service listings, approve/reject new services, view platform analytics, and manage users/providers.
+- <b>Authentication</b>: Secure login and signup for customers, providers, and admins.
+- <b>Image Uploads</b>: Providers can upload service images for better visibility.
+- <b>Responsive UI</b>: Optimized for desktop and mobile devices.
+
 
 
 ## 🛠️ Tech Stack
 
-- 🎨 **Front-end**: React, CSS Modules, React Router, React Toastify
-- ⚙️ **Back-end**: Node.js, Express, **MySQL**
-- 🔗 **APIs**: RESTful endpoints for all core features
-- 🛡️ **Other**: JWT Authentication, Multer for image uploads
+- <b>Front-end</b>: React, CSS Modules, React Router, React Toastify
+- <b>Back-end</b>: Node.js, Express, <b>MySQL</b>
+- <b>APIs</b>: RESTful endpoints for all core features
+- <b>Other</b>: JWT Authentication, Multer for image uploads
+
 
 
 ## 📁 Folder Structure
@@ -46,77 +52,81 @@ Local_services_finder/
 ```
 
 
+
 ## 🏁 Getting Started
 
-### ⚡ Prerequisites
-- Node.js (v16+ recommended)
-- npm or yarn
-- MySQL (local or cloud)
+<details>
+  <summary><b>Prerequisites</b></summary>
+  <ul>
+    <li>Node.js (v16+ recommended)</li>
+    <li>npm or yarn</li>
+    <li>MySQL (local or cloud)</li>
+  </ul>
+</details>
 
-### 📦 Installation
+<details>
+  <summary><b>Installation</b></summary>
+  <ol>
+    <li><b>Clone the repository</b><br>
+      <code>git clone https://github.com/Rakesh0045/ServiceSphere.git</code><br>
+      <code>cd ServiceSphere</code>
+    </li>
+    <li><b>Install dependencies</b><br>
+      <b>Backend:</b><br>
+      <code>cd back-end</code><br>
+      <code>npm install</code><br>
+      <b>Frontend:</b><br>
+      <code>cd ../front-end</code><br>
+      <code>npm install</code>
+    </li>
+    <li><b>Configure environment variables</b><br>
+      Create a <code>.env</code> file in <code>back-end/</code> with your MySQL credentials and JWT secret:<br>
+      <pre>
+MYSQL_HOST=localhost
+MYSQL_USER=your_mysql_user
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=your_database_name
+JWT_SECRET=your_jwt_secret
+PORT=5000
+      </pre>
+    </li>
+    <li><b>Start the development servers</b><br>
+      <b>Backend:</b><br>
+      <code>cd back-end</code><br>
+      <code>npm start</code><br>
+      <b>Frontend:</b><br>
+      <code>cd ../front-end</code><br>
+      <code>npm start</code><br>
+      The frontend runs on <code>http://localhost:3000</code> and backend on <code>http://localhost:5000</code>
+    </li>
+  </ol>
+</details>
 
-1. **Clone the repository**
-   ```sh
-   git clone https://github.com/Rakesh0045/ServiceSphere.git
-   cd ServiceSphere
-   ```
-
-2. **Install dependencies**
-   - Backend:
-     ```sh
-     cd back-end
-     npm install
-     ```
-   - Frontend:
-     ```sh
-     cd ../front-end
-     npm install
-     ```
-
-3. **Configure environment variables**
-   - Create a `.env` file in `back-end/` with your MySQL credentials and JWT secret:
-     ```env
-     MYSQL_HOST=localhost
-     MYSQL_USER=your_mysql_user
-     MYSQL_PASSWORD=your_mysql_password
-     MYSQL_DATABASE=your_database_name
-     JWT_SECRET=your_jwt_secret
-     PORT=5000
-     ```
-
-4. **Start the development servers**
-   - Backend:
-     ```sh
-     cd back-end
-     npm start
-     ```
-   - Frontend:
-     ```sh
-     cd ../front-end
-     npm start
-     ```
-   - The frontend runs on `http://localhost:3000` and backend on `http://localhost:5000`
 
 
 ## 🎯 Usage
 
-- 👤 **Customers**: Sign up, search for services, book appointments, and leave reviews.
-- 🛠️ **Providers**: Register, create and manage service listings, set availability, and handle bookings.
-- 🛡️ **Admins**: Log in to moderate services, approve/reject listings, and view analytics.
+- <b>Customers</b>: Sign up, search for services, book appointments, and leave reviews.
+- <b>Providers</b>: Register, create and manage service listings, set availability, and handle bookings.
+- <b>Admins</b>: Log in to moderate services, approve/reject listings, and view analytics.
+
 
 
 ## 📡 API Endpoints (Sample)
 
-- 📝 `POST /api/auth/signup` — Register a new user
-- 🔑 `POST /api/auth/login` — Login
-- 🔍 `GET /api/services` — List/search services
-- ➕ `POST /api/services` — Add new service (provider)
-- ✏️ `PUT /api/services/:id` — Edit service
-- 🗑️ `DELETE /api/services/:id` — Delete service
-- 📅 `GET /api/bookings` — View bookings
-- 📆 `POST /api/bookings` — Create booking
-- 🔄 `PUT /api/bookings/:id/status` — Update booking status
-- 🛡️ `GET /api/admin/services` — Admin moderation
+<table>
+  <tr><td><b>POST /api/auth/signup</b></td><td>Register a new user</td></tr>
+  <tr><td><b>POST /api/auth/login</b></td><td>Login</td></tr>
+  <tr><td><b>GET /api/services</b></td><td>List/search services</td></tr>
+  <tr><td><b>POST /api/services</b></td><td>Add new service (provider)</td></tr>
+  <tr><td><b>PUT /api/services/:id</b></td><td>Edit service</td></tr>
+  <tr><td><b>DELETE /api/services/:id</b></td><td>Delete service</td></tr>
+  <tr><td><b>GET /api/bookings</b></td><td>View bookings</td></tr>
+  <tr><td><b>POST /api/bookings</b></td><td>Create booking</td></tr>
+  <tr><td><b>PUT /api/bookings/:id/status</b></td><td>Update booking status</td></tr>
+  <tr><td><b>GET /api/admin/services</b></td><td>Admin moderation</td></tr>
+</table>
+
 
 
 ## 🤝 Contributing
@@ -134,7 +144,6 @@ This project is licensed under the MIT License.
 
 ---
 
-<p align="center">
-  <b>Empowering local service discovery and management.</b> <br>
-  <img src="https://img.shields.io/badge/ServiceSphere-Local%20Services-blueviolet?style=for-the-badge" alt="ServiceSphere Badge" />
-</p>
+<div align="center" style="margin-top: 2rem;">
+  <b style="font-size: 1.15rem; color: #6a5af9;">Empowering local service discovery and management.</b>
+</div>
