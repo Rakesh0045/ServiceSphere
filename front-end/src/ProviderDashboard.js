@@ -154,10 +154,18 @@ const ProviderDashboard = () => {
         }
     };
 
+    // ✅ FIXED: This function now uses an immutable approach to update the schedule state,
+    // preventing the inputs from losing focus or resetting unexpectedly.
     const handleScheduleChange = (dayIndex, field, value) => {
-        const newSchedule = [...schedule];
-        newSchedule[dayIndex][field] = value;
-        setSchedule(newSchedule);
+        setSchedule(currentSchedule =>
+            currentSchedule.map((day, index) => {
+                if (index === dayIndex) {
+                    // Create a new object for the updated day
+                    return { ...day, [field]: value };
+                }
+                return day;
+            })
+        );
     };
 
     const handleSaveSchedule = async () => {
@@ -303,67 +311,67 @@ const ProviderDashboard = () => {
                 )}
 
                 {activeTab === 'bookings' && (
-                     <>
-                        <section className="content-panel">
-                            <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
-                            <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
-                            <div className="schedule-editor">
-                                {schedule.map((day, index) => (
-                                    <div key={day.day_of_week} className="schedule-day-row">
-                                        <label className="schedule-day-label">{day.day_name}</label>
-                                        <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
-                                        <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
-                                            <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
-                                            <span>to</span>
-                                            <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
-                        </section>
-                        <section className="content-panel">
-                            <h3 className="panel-header">Customer Bookings</h3>
-                            {loading ? <div className="loader"></div> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
-                                <div className="provider-bookings-list">
-                                    {bookings.map(b => (
-                                        <div key={b.id} className="provider-booking-card">
-                                            <div className="provider-card-main">
-                                                <div className="provider-card-details">
-                                                    <h4>{b.service_name}</h4>
-                                                    <p><strong>Customer:</strong> {b.customer_name}</p>
-                                                    <p><strong>Date:</strong> {format(new Date(b.booking_start_time), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</p>
-                                                    {b.review_id && (
-                                                        <div className="review-display-provider">
-                                                            <StarRatingDisplay rating={b.rating} />
-                                                            {b.comment && <p className="review-comment-provider">"{b.comment}"</p>}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="provider-card-status">
-                                                    <span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span>
-                                                </div>
+                        <>
+                            <section className="content-panel">
+                                <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
+                                <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
+                                <div className="schedule-editor">
+                                    {schedule.map((day, index) => (
+                                        <div key={day.day_of_week} className="schedule-day-row">
+                                            <label className="schedule-day-label">{day.day_name}</label>
+                                            <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
+                                            <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
+                                                <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
+                                                <span>to</span>
+                                                <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
                                             </div>
-                                            
-                                            {(b.status === 'Pending' || b.status === 'Confirmed') && (
-                                                <div className="provider-card-actions">
-                                                    {b.status === 'Pending' && (
-                                                        <>
-                                                            <button className="btn btn-small success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button>
-                                                            <button className="btn btn-small danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button>
-                                                        </>
-                                                    )}
-                                                    {b.status === 'Confirmed' && (
-                                                        <button className="btn btn-small" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                        </section>
-                    </>
+                                <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
+                            </section>
+                            <section className="content-panel">
+                                <h3 className="panel-header">Customer Bookings</h3>
+                                {loading ? <div className="loader"></div> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
+                                    <div className="provider-bookings-list">
+                                        {bookings.map(b => (
+                                            <div key={b.id} className="provider-booking-card">
+                                                <div className="provider-card-main">
+                                                    <div className="provider-card-details">
+                                                        <h4>{b.service_name}</h4>
+                                                        <p><strong>Customer:</strong> {b.customer_name}</p>
+                                                        <p><strong>Date:</strong> {format(new Date(b.booking_start_time), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</p>
+                                                        {b.review_id && (
+                                                            <div className="review-display-provider">
+                                                                <StarRatingDisplay rating={b.rating} />
+                                                                {b.comment && <p className="review-comment-provider">"{b.comment}"</p>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="provider-card-status">
+                                                        <span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {(b.status === 'Pending' || b.status === 'Confirmed') && (
+                                                    <div className="provider-card-actions">
+                                                        {b.status === 'Pending' && (
+                                                            <>
+                                                                <button className="btn btn-small success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button>
+                                                                <button className="btn btn-small danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button>
+                                                            </>
+                                                        )}
+                                                        {b.status === 'Confirmed' && (
+                                                            <button className="btn btn-small" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+                        </>
                 )}
             </main>
             
@@ -397,14 +405,14 @@ const ProviderDashboard = () => {
             
             {isDeleteModalOpen && serviceToDelete && (
                  <div className="modal-overlay" onClick={() => setIsDeleteModalOpen(false)}>
-                     <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
-                         <div className="modal-header"><h3>Confirm Deletion</h3></div>
-                         <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
-                         <div className="modal-actions">
-                             <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
-                             <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
-                         </div>
-                     </div>
+                      <div className="modal-content confirm-delete-modal" onClick={e => e.stopPropagation()}>
+                           <div className="modal-header"><h3>Confirm Deletion</h3></div>
+                           <p>Are you sure you want to delete the service "{serviceToDelete?.service_name}"? This action cannot be undone.</p>
+                           <div className="modal-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+                                <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
+                           </div>
+                      </div>
                  </div>
             )}
             
