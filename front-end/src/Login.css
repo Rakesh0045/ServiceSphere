@@ -30,6 +30,7 @@
 
         /* --- Login Card --- */
         .login-card {
+          position: relative;
           max-width: 420px;
           width: 100%;
           padding: 3rem;
@@ -48,16 +49,41 @@
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Gradient Header --- */
+        /* --- Back to Home Button --- */
+        .back-to-home {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            color: var(--primary-light);
+        }
+
+        /* --- Header & Subtitle --- */
         .login-card h2.gradient-text {
           font-size: 2.2rem;
           font-weight: 700;
-          margin-bottom: 2.5rem;
+          margin-bottom: 0.75rem;
           background: linear-gradient(90deg, var(--primary-light), var(--accent-color));
           -webkit-background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
           color: var(--primary-color);
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 2.5rem;
         }
 
         /* --- Form & Inputs --- */
@@ -69,21 +95,22 @@
         }
 
         .input-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+          position: relative;
         }
 
-        .login-form label {
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: var(--text-secondary);
-          padding-left: 0.25rem;
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: color 0.3s ease;
         }
 
         .login-form input {
           width: 100%;
-          padding: 0.9rem 1rem;
+          padding: 0.9rem 1rem 0.9rem 3rem; /* Adjusted padding for icon */
           background-color: var(--input-bg);
           border: 1px solid var(--border-color);
           border-radius: 12px;
@@ -102,6 +129,33 @@
           outline: none;
           border-color: var(--primary-color);
           box-shadow: 0 0 0 4px rgba(106, 90, 249, 0.2);
+        }
+
+        .login-form input:focus + .input-icon {
+            color: var(--primary-color);
+        }
+
+        .login-form label {
+           display: none;
+        }
+
+        /* --- Form Options (Forgot Password) --- */
+        .form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -0.75rem;
+        }
+
+        .forgot-password {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
         }
 
         /* --- Submit Button --- */
@@ -148,12 +202,16 @@
         /* --- Responsive Design --- */
         @media (max-width: 500px) {
           .login-card {
-            padding: 2rem;
+            padding: 2.5rem 1.5rem;
             max-width: 100%;
+          }
+          
+          .back-to-home {
+            top: 1.5rem;
+            left: 1.5rem;
           }
 
           .login-card h2.gradient-text {
             font-size: 1.8rem;
-            margin-bottom: 2rem;
           }
         }

@@ -6,7 +6,7 @@ import Home from "./Home";
 import CustomerDashboard from "./CustomerDashboard";
 import ProviderDashboard from "./ProviderDashboard";
 import MyBookings from "./MyBookings";
-import AdminDashboard from "./AdminDashboard"; // <-- IMPORT
+import AdminDashboard from "./AdminDashboard"; 
 
 function App() {
   return (

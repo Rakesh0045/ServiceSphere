@@ -5,7 +5,8 @@ import {
     Calendar, 
     Star, 
     Search,
-    ArrowRight
+    ArrowRight,
+    Users
 } from "lucide-react";
 import "./Home.css"; 
 
@@ -100,10 +101,12 @@ const Home = () => {
                     </p>
                     <div className="hero-cta-group">
                         <button onClick={handleGetStarted} className="btn btn-hero-primary">
+                            <Search size={20} style={{ marginRight: '4px' }} /> 
                             <span>Find Services</span>
                             <ArrowRight size={20} />
                         </button>
                         <button onClick={() => navigate('/signup?role=provider')} className="btn btn-hero-secondary">
+                            <Users size={20} style={{ marginRight: '4px' }} /> 
                             Become a Provider
                         </button>
                     </div>
