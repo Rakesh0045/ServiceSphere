@@ -48,21 +48,39 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* === MODIFIED BUTTON UI === */
 .back-btn {
-  background: transparent;
+  /* Layout for icon + text */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* Visuals */
+  background-color: var(--card-bg);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: 500;
+  text-decoration: none;
+
+  /* Interactivity */
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .back-btn:hover {
+  /* Enhanced hover state */
+  transform: translateY(-2px);
   color: var(--text-primary);
-  background: var(--card-bg);
+  border-color: var(--primary-color);
+  background-color: #212130;
+  box-shadow: 0 4px 12px rgba(106, 90, 249, 0.2);
 }
+/* === END OF MODIFICATION === */
 
 .bookings-container {
   max-width: 900px;

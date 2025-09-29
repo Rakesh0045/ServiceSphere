@@ -252,7 +252,25 @@ const ProviderDashboard = () => {
                 <div className="tabs">
                     <button className={`tab-btn ${activeTab === 'services' ? 'active' : ''}`} onClick={() => setActiveTab('services')}>My Services</button>
                     <button className={`tab-btn ${activeTab === 'addService' ? 'active' : ''}`} onClick={() => setActiveTab('addService')}>Add Service</button>
-                    <button className={`tab-btn ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>Schedule & Bookings</button>
+                    <button className={`tab-btn ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>My Schedule</button>
+                    <button className={`tab-btn ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
+                        Customer Bookings
+                        {bookings.filter(b => b.status === 'Pending').length > 0 && (
+                            <span style={{
+                                background: 'var(--warning-color)',
+                                color: 'white',
+                                borderRadius: '50%',
+                                padding: '0.25em 0.6em',
+                                marginLeft: '0.5em',
+                                fontSize: '0.85em',
+                                fontWeight: 700,
+                                verticalAlign: 'middle',
+                                boxShadow: '0 2px 8px rgba(243,156,18,0.15)'
+                            }}>
+                                {bookings.filter(b => b.status === 'Pending').length}
+                            </span>
+                        )}
+                    </button>
                 </div>
 
                 {activeTab === 'services' && (
@@ -310,68 +328,86 @@ const ProviderDashboard = () => {
                     </section>
                 )}
 
-                {activeTab === 'bookings' && (
-                        <>
-                            <section className="content-panel">
-                                <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
-                                <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
-                                <div className="schedule-editor">
-                                    {schedule.map((day, index) => (
-                                        <div key={day.day_of_week} className="schedule-day-row">
-                                            <label className="schedule-day-label">{day.day_name}</label>
-                                            <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
-                                            <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
-                                                <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
-                                                <span>to</span>
-                                                <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
-                                            </div>
-                                        </div>
-                                    ))}
+                {activeTab === 'schedule' && (
+                    <section className="content-panel">
+                        <h3 className="panel-header"><CalendarIcon /> My Weekly Schedule</h3>
+                        <p className="panel-subtitle">Set your available hours for each day. Customers will only be able to book slots within these times.</p>
+                        <div className="schedule-editor">
+                            {schedule.map((day, index) => (
+                                <div key={day.day_of_week} className="schedule-day-row">
+                                    <label className="schedule-day-label">{day.day_name}</label>
+                                    <input type="checkbox" className="schedule-checkbox" checked={day.is_available} onChange={(e) => handleScheduleChange(index, 'is_available', e.target.checked)} />
+                                    <div className="schedule-time-inputs" style={{ opacity: day.is_available ? 1 : 0.5 }}>
+                                        <input type="time" disabled={!day.is_available} value={day.start_time} onChange={e => handleScheduleChange(index, 'start_time', e.target.value)} />
+                                        <span>to</span>
+                                        <input type="time" disabled={!day.is_available} value={day.end_time} onChange={e => handleScheduleChange(index, 'end_time', e.target.value)} />
+                                    </div>
                                 </div>
-                                <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
-                            </section>
-                            <section className="content-panel">
-                                <h3 className="panel-header">Customer Bookings</h3>
-                                {loading ? <div className="loader"></div> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
-                                    <div className="provider-bookings-list">
-                                        {bookings.map(b => (
-                                            <div key={b.id} className="provider-booking-card">
-                                                <div className="provider-card-main">
-                                                    <div className="provider-card-details">
-                                                        <h4>{b.service_name}</h4>
-                                                        <p><strong>Customer:</strong> {b.customer_name}</p>
-                                                        <p><strong>Date:</strong> {format(new Date(b.booking_start_time), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</p>
-                                                        {b.review_id && (
-                                                            <div className="review-display-provider">
-                                                                <StarRatingDisplay rating={b.rating} />
-                                                                {b.comment && <p className="review-comment-provider">"{b.comment}"</p>}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="provider-card-status">
-                                                        <span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span>
-                                                    </div>
-                                                </div>
-                                                
-                                                {(b.status === 'Pending' || b.status === 'Confirmed') && (
-                                                    <div className="provider-card-actions">
-                                                        {b.status === 'Pending' && (
-                                                            <>
-                                                                <button className="btn btn-small success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button>
-                                                                <button className="btn btn-small danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button>
-                                                            </>
-                                                        )}
-                                                        {b.status === 'Confirmed' && (
-                                                            <button className="btn btn-small" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>
-                                                        )}
+                            ))}
+                        </div>
+                        <div className="panel-footer"><button className="btn btn-primary" onClick={handleSaveSchedule}>Save Schedule</button></div>
+                    </section>
+                )}
+
+                {activeTab === 'bookings' && (
+                    <section className="content-panel">
+                        <h3 className="panel-header">Customer Bookings</h3>
+                        {/* Notification for pending bookings */}
+                        {bookings.filter(b => b.status === 'Pending').length > 0 && (
+                            <div style={{
+                                background: 'rgba(243, 156, 18, 0.15)',
+                                color: 'var(--warning-color)',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                marginBottom: '1.5rem',
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '1rem'
+                            }}>
+                                <CalendarIcon /> You have {bookings.filter(b => b.status === 'Pending').length} pending booking(s) awaiting your action!
+                            </div>
+                        )}
+                        {loading ? <div className="loader"></div> : bookings.length === 0 ? <p>You have no bookings yet.</p> : (
+                            <div className="provider-bookings-list">
+                                {bookings.map(b => (
+                                    <div key={b.id} className="provider-booking-card">
+                                        <div className="provider-card-main">
+                                            <div className="provider-card-details">
+                                                <h4>{b.service_name}</h4>
+                                                <p><strong>Customer:</strong> {b.customer_name}</p>
+                                                <p><strong>Date:</strong> {format(new Date(b.booking_start_time), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</p>
+                                                {b.review_id && (
+                                                    <div className="review-display-provider">
+                                                        <StarRatingDisplay rating={b.rating} />
+                                                        {b.comment && <p className="review-comment-provider">"{b.comment}"</p>}
                                                     </div>
                                                 )}
                                             </div>
-                                        ))}
+                                            <div className="provider-card-status">
+                                                <span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {(b.status === 'Pending' || b.status === 'Confirmed') && (
+                                            <div className="provider-card-actions">
+                                                {b.status === 'Pending' && (
+                                                    <>
+                                                        <button className="btn btn-small success" onClick={() => handleBookingStatusChange(b.id, 'Confirmed')}>Confirm</button>
+                                                        <button className="btn btn-small danger" onClick={() => handleBookingStatusChange(b.id, 'Cancelled')}>Cancel</button>
+                                                    </>
+                                                )}
+                                                {b.status === 'Confirmed' && (
+                                                    <button className="btn btn-small" onClick={() => handleBookingStatusChange(b.id, 'Completed')}>Mark as Completed</button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </section>
-                        </>
+                                ))}
+                            </div>
+                        )}
+                    </section>
                 )}
             </main>
             

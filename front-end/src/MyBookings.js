@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import RatingModal from './RatingModal';
 import './MyBookings.css'; 
 
+
 const API_BASE = "http://localhost:5000/api";
 
 const StarIcon = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
@@ -19,6 +20,14 @@ const StarRatingDisplay = ({ rating }) => {
         </div>
     );
 };
+
+const ArrowLeftIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" 
+         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+);
 
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -82,7 +91,8 @@ const MyBookings = () => {
                 <header className="bookings-header">
                     <div className="logo" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>ServiceSphere</div>
                     <button className="back-btn" onClick={handleBackClick}>
-                        &larr; Back to Dashboard
+                        <ArrowLeftIcon />
+                        <span>Back to Dashboard</span>
                     </button>
                 </header>
                 <main className="bookings-container">
